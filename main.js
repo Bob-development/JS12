@@ -12,13 +12,15 @@ const heroes = [
       {
         spellName : 'Shadow Raze',
         spellDmg : 90,
-        typeOfDmg : 'Magic'
+        typeOfDmg : 'Magic',
+        manaCost : 100
       },
       
       {
         spellName : 'Requiem',
-        spellDmg : 90,
-        typeOfDmg : 'Magic'
+        spellDmg : 130,
+        typeOfDmg : 'Magic',
+        manaCost : 200
       },
     ]
   },
@@ -34,19 +36,22 @@ const heroes = [
       {
         spellName : 'Sun Strike',
         spellDmg : 120,
-        typeOfDmg : 'Clear'
+        typeOfDmg : 'Clear',
+        manaCost : 150
       },
       
       {
         spellName : 'Tornado',
         spellDmg : 60,
-        typeOfDmg : 'Magic'
+        typeOfDmg : 'Magic',
+        manaCost : 200
       },
 
       {
         spellName : 'EMP',
         spellDmg : 30,
-        typeOfDmg : 'Magic'
+        typeOfDmg : 'Magic',
+        manaCost : 100
       }
     ]
   },
@@ -62,13 +67,15 @@ const heroes = [
       {
         spellName : 'Hook',
         spellDmg : 100,
-        typeOfDmg : 'Clear'
+        typeOfDmg : 'Clear',
+        manaCost : 115
       },
       
       {
         spellName : 'Dismember',
         spellDmg : 150,
-        typeOfDmg : 'Magic'
+        typeOfDmg : 'Magic',
+        manaCost : 120
       }
     ]
   },
@@ -84,7 +91,8 @@ const heroes = [
       {
         spellName : 'Poison',
         spellDmg : 50,
-        typeOfDmg : 'Magic'
+        typeOfDmg : 'Magic',
+        manaCost : 80
       }
     ]
   },
@@ -100,13 +108,15 @@ const heroes = [
       {
         spellName : 'Laser',
         spellDmg : 120,
-        typeOfDmg : 'Magic'
+        typeOfDmg : 'Magic',
+        manaCost : 150
       }, 
       
       {
         spellName : 'Rockets',
         spellDmg : 80,
-        typeOfDmg : 'Magic'
+        typeOfDmg : 'Magic',
+        manaCost : 120
       }
     ]
   }
@@ -135,37 +145,70 @@ while (isRunning){
 
 
 function battle(hero1, hero2) {
-  let isBatte = true;
+  let isBattle = true;
 
-  while(isBatte){
+  while(isBattle){
     let heroesBattle = prompt(`${myHero['heroName']}(${myHero['HP']}) VS ${enemyHero['heroName']}(${enemyHero['HP']})\n1)Kick him(use ur own dmg);  \n2)Choose spell; \n3)Random attack`);
   
     switch (heroesBattle) {
       case '1':
-        calclPhysicResist(hero2, hero1['damage']);  //CALC PHYSIC RESIST HERO2
-        const heroAttack = getAttack(hero2, 0, 4);  //GET WHICH ATTACK WILL KICK HERO2
-        hero2Attack(hero2,hero1,heroAttack);        //HERO2 ATTACK
+        calclPhysicResist(hero2, hero1['damage']);        //CALC PHYSIC RESIST HERO2
+        
+        const secondHeroAttack = getAttack(hero2, 0, 4);  //GET WHICH ATTACK WILL KICK HERO2
+        hero2Attack(hero2,hero1,secondHeroAttack);        //HERO2 ATTACK
         
         if(hero1['HP'] < 0){
           alert(hero2['heroName'] + "WIN")
-          isBatte = false;
+          isBattle = false;
           break;
         }
         else if(hero2['HP'] < 0){
           alert(hero1['heroName'] + "WIN");
-          isBatte = false;
+          isBattle = false;
           break;
         }
+        // winner(hero1,hero2,isBattle);
         
         alert(`${hero1['heroName']} = ${hero1['HP']}\n${hero2['heroName']} = ${hero2['HP']}`);
         break;
   
       case '2':
-        chooseSpell(hero1);
+        const heroSpellDmg = chooseSpell(hero1);
+
+        const heroMana = heroManapool(hero1,heroSpellDmg);
+
+        if(heroMana < 0){
+          alert("U cant choose ur spell, cause ur manapool is empty");
+          break;
+        }
+
+        calclMagicResist(hero2,heroSpellDmg);
+
+        const Hero2Attack = getAttack(hero2, 0, 4);
+        hero2Attack(hero2,hero1,Hero2Attack);
+        
+        alert(`${hero1['heroName']} = ${hero1['HP']}\n${hero2['heroName']} = ${hero2['HP']}`);
         break;
     
       case '3':
-        
+        const firstHeroAttack = getAttack(hero1, 0, 4);
+        hero1Attack(hero2,hero1,firstHeroAttack);
+
+        const secondHeroRandAttack = getAttack(hero2, 0, 4);
+        hero2Attack(hero2,hero1,secondHeroRandAttack);
+
+        if(hero1['HP'] < 0){
+          alert(hero2['heroName'] + "WIN")
+          isBattle = false;
+          break;
+        }
+        else if(hero2['HP'] < 0){
+          alert(hero1['heroName'] + "WIN");
+          isBattle = false;
+          break;
+        }
+
+        alert(`${hero1['heroName']} = ${hero1['HP']}\n${hero2['heroName']} = ${hero2['HP']}`);
         break;
   
       default:
@@ -173,6 +216,34 @@ function battle(hero1, hero2) {
     }
   }
 }
+
+//FUNC THAT WILL SAID WHO IS WINNER
+function winner(hero1,hero2,isBattle) {    //????
+  if(hero1['HP'] < 0){
+    alert(hero2['heroName'] + "WIN")
+    isBattle = false;
+  }
+  else if(hero2['HP'] < 0){
+    alert(hero1['heroName'] + "WIN");
+    isBattle = false;
+  }
+
+  return isBattle;
+}
+
+// FUNC THAT WILL CONSIDER MANAPOOL OF HEROES
+function heroManapool(hero,spellDmg) {
+  // let heroMana = hero['manapool'];
+
+  for(const el of hero['spells']){
+    if(el['spellDmg'] === spellDmg){
+      hero['manapool'] -= el['manaCost'];
+      let heroMana = hero['manapool'];
+      return heroMana;
+    }
+  }
+}
+
 
 // FUNC THAT WILL CALC RANDOM HERO2 DMG
 function hero2Attack(hero2,hero1,attack) {
@@ -189,11 +260,11 @@ function hero1Attack(hero2,hero1,attack) {
     calclPhysicResist(hero2, attack);
   } else calclMagicResist(hero2, attack);
 
-  return hero1['HP'];
+  return hero2['HP'];
 }
 
 // FUNC THAT WILL CALC MAGIC DMG
-function calclMagicResist(hero,dmg) {  //ternarniy operator
+function calclMagicResist(hero,dmg) {
    hero['HP'] = hero['HP'] - dmg + dmg * hero['magicResist'];
    return hero['HP'];
 }
@@ -304,7 +375,8 @@ function getAttack(hero, min, max) {
   return heroAttack;
 }
 
-function chooseSpell(hero1, hero2) {
+//FUNC THAT CHOOSE SPELL
+function chooseSpell(hero1) {
   let heroSpells = '';
 
   for(const el of hero1['spells']){
@@ -314,20 +386,23 @@ function chooseSpell(hero1, hero2) {
   }
 
   let isValidSpell = false;
+  let choicedSpellDMG;
 
   while(!isValidSpell){
     const choicedSpell = prompt(`Choose ur spell ${heroSpells}`);
   
     for(const el of hero1['spells']){
-      if(choicedSpell.toLocaleLowerCase() !== el.spellName){
-        alert("Ur spell name is incorrect, try again")
-      } 
-      else {
-        const choicedSpellDMG = el.dmg;
+      if(choicedSpell.toLocaleLowerCase().replace(/\s+/g, "") === el['spellName'].toLocaleLowerCase().replace(/\s+/g, "")){
+        choicedSpellDMG = el['spellDmg'];
         isValidSpell = true;
+        break;
       }
     }
-  }
-}
 
-chooseSpell(heroes[0]);
+    if(typeof(choicedSpellDMG) === "undefined"){
+      alert("Ur spell name is incorrect, try again");
+    }
+  }
+
+  return choicedSpellDMG;
+}
